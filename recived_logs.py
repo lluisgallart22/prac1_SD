@@ -1,3 +1,4 @@
+import sys
 import pika
 import threading
 from queue import Queue
@@ -5,11 +6,13 @@ from queue import Queue
 # Cola para la comunicación entre hilos
 cola = Queue()
 
+nomXat = sys.argv[1]
+
 def enviar_mensaje():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
     
-    channel.exchange_declare(exchange='logs', exchange_type='fanout')
+    channel.exchange_declare(exchange=nomXat, exchange_type='fanout')
 
     print("Chat grupal")
     while True:
@@ -20,7 +23,7 @@ def enviar_mensaje():
         else:
             print("Enviado correctamente")
             message = entrada
-            channel.basic_publish(exchange='logs', routing_key='', body=message)
+            channel.basic_publish(exchange=nomXat, routing_key='', body=message)
     
     connection.close()
 
@@ -31,7 +34,7 @@ def recibir_mensaje():
     result = channel.queue_declare(queue='', exclusive=True)
     queue_name = result.method.queue
 
-    channel.queue_bind(exchange='logs', queue=queue_name)
+    channel.queue_bind(exchange=nomXat, queue=queue_name)
 
     def callback(ch, method, properties, body):
         print(f"[x] {body}")

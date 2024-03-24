@@ -15,7 +15,9 @@ do
 			error=0
 			;;
 		"2")
-			#script2
+			echo "Nom del xat:"
+			read -p nomXat
+			python3 recived_logs.py $nomXat
 			error=0
 			;;
 		"3")
