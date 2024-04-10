@@ -1,0 +1,27 @@
+import pika
+
+#Fem una connexio
+connexio = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+canal = connexio.channel()
+
+#Creem un canal d'events
+canal.exchange_declare(exchange='descobrir xat', exchange_type='fanout')
+
+#Publiquem un event per descobrir xats
+canal.basic_publish(exchange='descobrir xat',routing_key='', body='request', properties=pika.BasicProperties(delivery_mode=2))
+
+#Funcio per poder processar les respostes dels xats existents
+def callback(canal, metode, propietats, cos):
+    print("Resposta rebuda ->", cos.decode())
+
+#Creem una cua temporal per poder rebre respostes
+resultat = canal.queue_declare(queue='', exclusive=True)
+nom_cua = resultat.method.queue
+
+#Vinculem la cua amb el event de descobriment i adjuntem la funcio de callback
+canal.queue_bind(exchange='descobrir xat', queue=nom_cua)
+canal.basic_consume(queue=nom_cua, on_message_callback=callback, auto_ack=True)
+
+#Iniciem
+print('Esperant xats ...')
+canal.start_consuming()
