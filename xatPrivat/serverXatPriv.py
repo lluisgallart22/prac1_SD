@@ -3,9 +3,28 @@ from concurrent import futures
 import xatPrivat_pb2
 import xatPrivat_pb2_grpc
 
+Usuaris = []
+contador = 0
+
+
 class GreeterServicer(xatPrivat_pb2_grpc.GreeterServicer):
+    def __init__(self):
+        self.connected_clients = {}  # Diccionario para almacenar clientes conectados y sus contextos de comunicación
+
     def SendMessage(self, request, context):
-        return xatPrivat_pb2.HelloReply(message=f"Message -> {request.name}!")
+        global contador
+        Usuari = ""
+        if request.name == "Connect" :
+            client_id = request.client_id
+            self.connected_clients[client_id] = context
+            Usuari = ""
+            for client_id, client_context in self.connected_clients.items():
+                Usuari = Usuari + "\n" + client_context.peer()
+                return xatPrivat_pb2.MessageReply(message=f"Usuaris Connectats -> {Usuari}")
+
+        else: 
+            return xatPrivat_pb2.MessageReply(message=f"Message -> {request.name}!")
+        
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

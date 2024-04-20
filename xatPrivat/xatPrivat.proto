@@ -5,6 +5,7 @@ service Greeter {
 
 message MessageRequest {
 	string name = 1;
+	string client_id = 2;
 }
 
 message MessageReply {
