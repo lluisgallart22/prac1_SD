@@ -15,8 +15,13 @@ class GreeterStub(object):
             channel: A grpc.Channel.
         """
         self.SendMessage = channel.unary_unary(
-                '/Greeter/SendMessage',
+                '/tu_paquete.Greeter/SendMessage',
                 request_serializer=xatPrivat__pb2.MessageRequest.SerializeToString,
+                response_deserializer=xatPrivat__pb2.MessageReply.FromString,
+                )
+        self.ReceiveMessage = channel.unary_unary(
+                '/tu_paquete.Greeter/ReceiveMessage',
+                request_serializer=xatPrivat__pb2.Empty.SerializeToString,
                 response_deserializer=xatPrivat__pb2.MessageReply.FromString,
                 )
 
@@ -30,6 +35,13 @@ class GreeterServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ReceiveMessage(self, request, context):
+        """Nuevo método para recibir mensajes del servidor
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GreeterServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -38,9 +50,14 @@ def add_GreeterServicer_to_server(servicer, server):
                     request_deserializer=xatPrivat__pb2.MessageRequest.FromString,
                     response_serializer=xatPrivat__pb2.MessageReply.SerializeToString,
             ),
+            'ReceiveMessage': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReceiveMessage,
+                    request_deserializer=xatPrivat__pb2.Empty.FromString,
+                    response_serializer=xatPrivat__pb2.MessageReply.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'Greeter', rpc_method_handlers)
+            'tu_paquete.Greeter', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -59,8 +76,25 @@ class Greeter(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/Greeter/SendMessage',
+        return grpc.experimental.unary_unary(request, target, '/tu_paquete.Greeter/SendMessage',
             xatPrivat__pb2.MessageRequest.SerializeToString,
+            xatPrivat__pb2.MessageReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ReceiveMessage(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/tu_paquete.Greeter/ReceiveMessage',
+            xatPrivat__pb2.Empty.SerializeToString,
             xatPrivat__pb2.MessageReply.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

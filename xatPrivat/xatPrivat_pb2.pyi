@@ -17,3 +17,7 @@ class MessageReply(_message.Message):
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
     message: str
     def __init__(self, message: _Optional[str] = ...) -> None: ...
+
+class Empty(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
