@@ -7,14 +7,12 @@ do
 	echo "2.Subscribe to group chat"
 	echo "3.Discover chats"
 	echo "4.Acces insult channel"
+	echo "5.Xat privat"
 	read -p "Opcio:" option
 	case $option in
 		"1")
-			#result=$(python3 getNameServer.py ConnectChat)
-			#echo "$result"
-			nom=$(hostname)
-			python3 server/nameServer.py "$nom" "127.0.0.1:50051"
-			python3 xatPrivat/serverXat.py
+			result=$(python3 getNameServer.py ConnectChat)
+			echo "$result"
 			error=0
 			;;
 		"2")
@@ -22,8 +20,6 @@ do
 			python3 discover/discoverChannel
 			echo "Si vols crear un grup has de posar un nom diferents a aquets o si vols entrar a un grup sol has de escriure el nom del grup."
 			read nomXat
-			#falta saber com descobrir quin es el port
-			python3 server/nameServer.py "$nomXat" "127.0.0.1:"
 			python3 xatGrupal/recived_logs.py $nomXat
 			break
 			;;
@@ -37,6 +33,13 @@ do
 			python3 insults/insultClient.py
 			break
 			;;
+		"5")
+			echo "Acces al chat privat"
+			gnome-terminal -- bash -c "python3 xatPrivat/serverXat.py"
+			python3 xatPrivat/clientXat.py
+			break
+			;;
+
 		*)
 			echo "Aquesta opció no existeix"
 			;;
