@@ -1,50 +1,59 @@
 import pika
 import time
 import threading
+import sys
 
+try:
+    def connexio():
+        parameters = pika.ConnectionParameters('localhost')
+        return pika.BlockingConnection(parameters)
+    #Fem una connexio
+    connection = connexio()
+    canal = connection.channel()
+    llista = []
+    segona_llista = []
+    #Creem un canal d'events
+    canal.exchange_declare(exchange='descobrir xat', exchange_type='fanout')
 
-#Fem una connexio
-connexio = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-canal = connexio.channel()
-llista = []
-segona_llista = []
-#Creem un canal d'events
-canal.exchange_declare(exchange='descobrir xat', exchange_type='fanout')
+    #Publiquem un event per descobrir xats
+    canal.basic_publish(exchange='descobrir xat',routing_key='', body='request', properties=pika.BasicProperties(delivery_mode=2))
 
-#Publiquem un event per descobrir xats
-canal.basic_publish(exchange='descobrir xat',routing_key='', body='request', properties=pika.BasicProperties(delivery_mode=2))
+    #Funcio per poder processar les respostes dels xats existents
+    def callback(canal, metode, propietats, cos):
+        #print(cos.decode())
+        global llista
+        llista.append(cos.decode())
 
-#Funcio per poder processar les respostes dels xats existents
-def callback(canal, metode, propietats, cos):
-    print(cos.decode())
-    global llista
-    llista.append(cos.decode())
+    #Creem una cua temporal per poder rebre respostes
+    resultat = canal.queue_declare(queue='', exclusive=True)
+    nom_cua = resultat.method.queue
 
-#Creem una cua temporal per poder rebre respostes
-resultat = canal.queue_declare(queue='', exclusive=True)
-nom_cua = resultat.method.queue
+    #Vinculem la cua amb el event de descobriment i adjuntem la funcio de callback
+    canal.queue_bind(exchange='descobrir xat', queue=nom_cua)
+    canal.basic_consume(queue=nom_cua, on_message_callback=callback, auto_ack=True)
+    def s_temps():
+        time.sleep(1)
+        if connexio and not connection.is_closed:
+            canal.stop_consuming()
+        
 
-#Vinculem la cua amb el event de descobriment i adjuntem la funcio de callback
-canal.queue_bind(exchange='descobrir xat', queue=nom_cua)
-canal.basic_consume(queue=nom_cua, on_message_callback=callback, auto_ack=True)
-def s_temps():
-    time.sleep(1)
-    canal.stop_consuming()
+    thread_s = threading.Thread(target=s_temps)
+    thread_s.start()
+    #Iniciem
+    print('Esperant xats ...')
+    canal.start_consuming()
+    for elemento in llista:
+        #print(elemento)
+        if elemento not in segona_llista:
+            segona_llista.append(elemento)
 
-thread_s = threading.Thread(target=s_temps)
-thread_s.start()
-#Iniciem
-print('Esperant xats ...')
-canal.start_consuming()
-print("vull plorar", llista[1])
-for elemento in llista:
-    #print(elemento)
-    if elemento not in segona_llista:
-        segona_llista.append(elemento)
+    print("-----------------")
 
-print("-----------------")
+    for jo in segona_llista:
+        print(jo)
 
-for jo in segona_llista:
-    print(jo)
-
-thread_s.join()
+    thread_s.join()
+except pika.exceptions.StreamLostError:
+    print("Error: se perdió la conexión con RabbitMQ.")
+    connection=connexio()
+    channel = connection.channel()
