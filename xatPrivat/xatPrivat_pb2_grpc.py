@@ -5,7 +5,7 @@ import grpc
 import xatPrivat_pb2 as xatPrivat__pb2
 
 
-class GreeterStub(object):
+class XatStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -14,19 +14,14 @@ class GreeterStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SendMessage = channel.unary_unary(
-                '/tu_paquete.Greeter/SendMessage',
+        self.SendMessage = channel.unary_stream(
+                '/Xat/SendMessage',
                 request_serializer=xatPrivat__pb2.MessageRequest.SerializeToString,
-                response_deserializer=xatPrivat__pb2.MessageReply.FromString,
-                )
-        self.ReceiveMessage = channel.unary_unary(
-                '/tu_paquete.Greeter/ReceiveMessage',
-                request_serializer=xatPrivat__pb2.Empty.SerializeToString,
-                response_deserializer=xatPrivat__pb2.MessageReply.FromString,
+                response_deserializer=xatPrivat__pb2.MessageResponse.FromString,
                 )
 
 
-class GreeterServicer(object):
+class XatServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SendMessage(self, request, context):
@@ -35,34 +30,22 @@ class GreeterServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ReceiveMessage(self, request, context):
-        """Nuevo método para recibir mensajes del servidor
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
-
-def add_GreeterServicer_to_server(servicer, server):
+def add_XatServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendMessage': grpc.unary_unary_rpc_method_handler(
+            'SendMessage': grpc.unary_stream_rpc_method_handler(
                     servicer.SendMessage,
                     request_deserializer=xatPrivat__pb2.MessageRequest.FromString,
-                    response_serializer=xatPrivat__pb2.MessageReply.SerializeToString,
-            ),
-            'ReceiveMessage': grpc.unary_unary_rpc_method_handler(
-                    servicer.ReceiveMessage,
-                    request_deserializer=xatPrivat__pb2.Empty.FromString,
-                    response_serializer=xatPrivat__pb2.MessageReply.SerializeToString,
+                    response_serializer=xatPrivat__pb2.MessageResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'tu_paquete.Greeter', rpc_method_handlers)
+            'Xat', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class Greeter(object):
+class Xat(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -76,25 +59,8 @@ class Greeter(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/tu_paquete.Greeter/SendMessage',
+        return grpc.experimental.unary_stream(request, target, '/Xat/SendMessage',
             xatPrivat__pb2.MessageRequest.SerializeToString,
-            xatPrivat__pb2.MessageReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def ReceiveMessage(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/tu_paquete.Greeter/ReceiveMessage',
-            xatPrivat__pb2.Empty.SerializeToString,
-            xatPrivat__pb2.MessageReply.FromString,
+            xatPrivat__pb2.MessageResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

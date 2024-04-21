@@ -1,19 +1,13 @@
 syntax = "proto3";
 
-package tu_paquete;
-
-service Greeter {
-  rpc SendMessage(MessageRequest) returns (MessageReply);
-  rpc ReceiveMessage(Empty) returns (MessageReply);  // Nuevo método para recibir mensajes del servidor
+service Xat {
+	rpc SendMessage (MessageRequest) returns (stream MessageResponse);
 }
-
 message MessageRequest {
-  string name = 1;
-  string client_id = 2;
+	string sender = 1;
+	string text = 2;
 }
-
-message MessageReply {
-  string message = 1;
+message MessageResponse {
+	string sender = 1;
+	string text = 2;
 }
-
-message Empty {}  // Mensaje vacío que se usa como parámetro en el método ReceiveMessage
