@@ -9,8 +9,10 @@ lock = threading.Lock()
 cola = Queue()
 temps = 0
 nomXat = sys.argv[1]
+consumidor_activo=True
 
 def enviar_mensaje():
+    global consumidor_activo
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
     
@@ -23,6 +25,7 @@ def enviar_mensaje():
         entrada = input()
         if entrada.lower() == 'exit':
             print("Saliendo del bucle.")
+            consumidor_activo=False
             break
         else:
             print("Enviado correctamente")
@@ -32,6 +35,7 @@ def enviar_mensaje():
     connection.close()
 
 def recibir_mensaje():
+    global consumidor_activo
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
 
@@ -44,12 +48,13 @@ def recibir_mensaje():
 
     channel.basic_consume(
         queue=queue_name, on_message_callback=callback, auto_ack=True)
-    channel.start_consuming()
+    while consumidor_activo:
+        connection.process_data_events()
     
     connection.close()
 
 def descobriment_xat():
-    
+    global consumidor_activo
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
 
@@ -69,11 +74,13 @@ def descobriment_xat():
         #channel.basic_cancel(consumer_tag=method_frame.consumer_tag)
         temps =12
         
+        
 
 
     channel.basic_consume(
         queue=queue_name, on_message_callback=callback, auto_ack=True)
-    channel.start_consuming()
+    while consumidor_activo:
+        connection.process_data_events()
     
     connection.close()
     

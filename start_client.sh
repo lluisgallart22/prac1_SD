@@ -15,18 +15,22 @@ do
 			error=0
 			;;
 		"2")
-			echo "Nom del xat:"
-			read -p nomXat
-			python3 recived_logs.py $nomXat
-			error=0
+			echo "Que vols fer crear un nou xat Grupal o connectarte a un existent?"
+			python3 discover/discoverChannel
+			echo "Si vols crear un grup has de posar un nom diferents a aquets o si vols entrar a un grup sol has de escriure el nom del grup."
+			read nomXat
+			python3 xatGrupal/recived_logs.py $nomXat
+			break
 			;;
 		"3")
-			#script3
-			error=0
+			echo "Els grups creats son els següents:"
+			python3 discover/discoverChannel
+			break
 			;;
 		"4")
-			#script4
-			error=0
+			echo "Acces al chat d'insults"
+			python3 insults/insultClient.py
+			break
 			;;
 		*)
 			echo "Aquesta opció no existeix"

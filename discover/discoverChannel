@@ -3,6 +3,8 @@ import time
 import threading
 import sys
 
+consumidor_activo = 1
+
 try:
     def connexio():
         parameters = pika.ConnectionParameters('localhost')
@@ -23,6 +25,8 @@ try:
         #print(cos.decode())
         global llista
         llista.append(cos.decode())
+       
+ 
 
     #Creem una cua temporal per poder rebre respostes
     resultat = canal.queue_declare(queue='', exclusive=True)
@@ -31,17 +35,16 @@ try:
     #Vinculem la cua amb el event de descobriment i adjuntem la funcio de callback
     canal.queue_bind(exchange='descobrir xat', queue=nom_cua)
     canal.basic_consume(queue=nom_cua, on_message_callback=callback, auto_ack=True)
-    def s_temps():
-        time.sleep(1)
-        if connexio and not connection.is_closed:
-            canal.stop_consuming()
+
         
 
-    thread_s = threading.Thread(target=s_temps)
-    thread_s.start()
     #Iniciem
     print('Esperant xats ...')
-    canal.start_consuming()
+    while consumidor_activo<200 :
+        consumidor_activo += 1
+        connection.process_data_events()
+
+    
     for elemento in llista:
         #print(elemento)
         if elemento not in segona_llista:
@@ -52,8 +55,11 @@ try:
     for jo in segona_llista:
         print(jo)
 
-    thread_s.join()
+    if not segona_llista:
+        print("No hi ha cap xat creat")
+
+    
 except pika.exceptions.StreamLostError:
-    print("Error: se perdió la conexión con RabbitMQ.")
     connection=connexio()
     channel = connection.channel()
+
