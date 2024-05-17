@@ -41,8 +41,7 @@ do
 			;;
 		"5")
 			echo "Acces al chat privat"
-			gnome-terminal -- bash -c "python3 xatPrivat/serverXat.py"
-			python3 xatPrivat/clientXat.py
+			python3 xatPrivat/serverXat.py
 			break
 			;;
 
