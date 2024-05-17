@@ -5,7 +5,8 @@ service Xat {
 }
 message MessageRequest {
 	string sender = 1;
-	string text = 2;
+	string receiver = 2;
+	string text = 3;
 }
 message MessageResponse {
 	string sender = 1;

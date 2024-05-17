@@ -7,7 +7,7 @@ r = redis.Redis(host='localhost', port=6379)
 
 def set_chat_connection(ip, port, nomConnexio, db):
     r.hset(f'nom:{nomConnexio}', mapping={
-        'host': ip,
+        'ip': ip,
         'port': port,
         'db': db
     })

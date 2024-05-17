@@ -1,6 +1,9 @@
 #!/bin/bash
 
-python3 nameServer.py set '127.0.0.1' 4000 'joan' 0
+echo "Introdueix el teu nom:"
+read nom
+
+python3 server/nameServer.py set '127.0.0.1' 4000 "$nom" 0
 
 error=1
 while [ $error -ne 0 ] 
@@ -14,7 +17,7 @@ do
 	read -p "Opcio:" option
 	case $option in
 		"1")
-			result=$(python3 getNameServer.py get joan)
+			result=$(python3 server/nameServer.py get joan)
 			echo "$result"
 			error=0
 			;;
