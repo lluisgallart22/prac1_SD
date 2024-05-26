@@ -17,15 +17,25 @@ do
 	read -p "Opcio:" option
 	case $option in
 		"1")
-			result=$(python3 server/nameServer.py get joan)
-			echo "$result"
-			error=0
+			echo "Et vols connectar a un xat privat o a un grupal?"
+			echo "Per connectar-te a un xat privat posa 0"
+			echo "Per connectar-te a un xat grupal posa 1"
+			read num
+			if [ $num -eq 0 ]; then
+				echo "Amb qui vols parlar?"
+				echo "Proporciona el nom del usuari"
+				read user
+				dades=$(python3 server/nameServer.py get $user)
+				echo $result
+			elif [ $num -eq 1 ]; then
+				echo "Proporciona el nom del xat grupal"
+				echo "En el cas de que el nom proporcionat no es trobi al servidor es crearà un de nou"
+				read nomXatGrupal
+				echo $nomXatGrupal
 			;;
 		"2")
-			echo "Que vols fer crear un nou xat Grupal o connectarte a un existent?"
-			python3 discover/discoverChannel
-			echo "Si vols crear un grup has de posar un nom diferents a aquets o si vols entrar a un grup sol has de escriure el nom del grup."
-			read nomXat
+			echo "Proporciona el nom del xat grupal"
+			echo "En el cas de que el nom proporcionat no es trobi al servidor es crearà un de nou"				read nomXat
 			python3 xatGrupal/recived_logs.py $nomXat
 			break
 			;;

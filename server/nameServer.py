@@ -5,6 +5,8 @@ import argparse
 
 r = redis.Redis(host='localhost', port=6379)
 
+#Pels clients db = 0, pels xats grupals db = 1
+
 def set_chat_connection(ip, port, nomConnexio, db):
     r.hset(f'nom:{nomConnexio}', mapping={
         'ip': ip,
