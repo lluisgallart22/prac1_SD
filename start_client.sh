@@ -29,6 +29,7 @@ while [ $error -ne 0 ]; do
     echo "3. Discover chats"
     echo "4. Acces insult channel"
     echo "5. Xat privat"
+    echo "6. Contingut REDIS"
     read -p "Opcio: " option
     case $option in
         "1")
@@ -62,6 +63,10 @@ while [ $error -ne 0 ]; do
         "5")
             echo "Acces al chat privat"
             python3 xatPrivat/serverXat.py
+            ;;
+        "6")
+            echo "Contingut REDIS"
+            ./redis.sh
             ;;
         *)
             echo "Aquesta opció no existeix"
