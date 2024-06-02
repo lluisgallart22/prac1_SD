@@ -6,20 +6,18 @@ from queue import Queue
 
 
 lock = threading.Lock()
-# Cola para la comunicación entre hilos
 cola = Queue()
 temps = 0
 nomXat = sys.argv[1]
 consumidor_activo=True
 
+#Opcio per enviar missatges dins del xat
 def enviar_mensaje():
     global consumidor_activo
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
     
     channel.exchange_declare(exchange=nomXat, exchange_type='fanout', durable=True)
-    #channel.exchange_declare(exchange='descobrir xat', exchange_type='fanout')
-    #channel.basic_publish(exchange='descobrir xat', routing_key='', body='Nuevo chat creado: ' + nomXat)
     
     print("Chat grupal")
     while True:
@@ -40,7 +38,7 @@ def enviar_mensaje():
                 ))
     
     connection.close()
-
+#Opcio usada per rebre tots els missatges que s'han enviat al xat grupal
 def recibir_mensaje():
     global consumidor_activo
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
@@ -60,12 +58,13 @@ def recibir_mensaje():
         connection.process_data_events()
     
     connection.close()
-
+#Aquesta funcio el que fa es agafar tots els missatges que s'han enviat avans de connectarse 
+#i mostrar-los ja que tots els missatges son persistents, aquesta funcio sol se executa duran 1 segon ja que sol poder
+#agafar els missatges i mostrarlos per terminal
 def recibir_mensajes_persistentes():
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     channel = connection.channel()
 
-    # Declarar el intercambio y la cola con durabilidad
     channel.exchange_declare(exchange=nomXat, exchange_type='fanout', durable=True)
     queue_name = 'persistent_queue_' + nomXat
     channel.queue_declare(queue=queue_name, durable=True)
@@ -79,11 +78,9 @@ def recibir_mensajes_persistentes():
         queue=queue_name, on_message_callback=callback, auto_ack=False)
 
     print('Esperando mensajes. Presiona Ctrl+C para salir.')
-    # Esperar 2 segundos antes de detener el consumo
     connection.sleep(1)
-    # Detener el consumo
     connection.close()
-
+#Quan creem un nou xat emmagatzemem el xat al REDIS
 def guardar_nombre_chat():
     try:
         # Conexión a Redis
@@ -106,12 +103,9 @@ def descobriment_xat():
 
 
     def callback(ch, method, properties, body):
-        #method_frame, header_frame, body = channel.basic_get(queue=queue_name)
         global temps
-        # Aquí es donde se publicaría el mensaje para notificar al código de descubrimiento
         channel.exchange_declare(exchange='descobrir xat', exchange_type='fanout')
         channel.basic_publish(exchange='descobrir xat', routing_key='', body=nomXat)
-        #channel.basic_cancel(consumer_tag=method_frame.consumer_tag)
         temps =12
         
         
@@ -126,21 +120,19 @@ def descobriment_xat():
 
 
 
-# Crear e iniciar los hilos
+#Creacio de tots els threads
 thread_recibir = threading.Thread(target=recibir_mensaje)
 thread_enviar = threading.Thread(target=enviar_mensaje)
 thread_recivir_persistent =  threading.Thread(target=recibir_mensajes_persistentes)
 thread_guardar_redis = threading.Thread(target=guardar_nombre_chat)
-
 thread_descobriment = threading.Thread(target=descobriment_xat)
-
+#Iniciem els threadds
 thread_guardar_redis.start()
 thread_recivir_persistent.start()
 thread_recibir.start()
 thread_enviar.start()
 thread_descobriment.start()
-
-#Esperar a que ambos hilos terminen
+#Esperem les execucions dels threads
 thread_guardar_redis.join()
 thread_recivir_persistent.join()
 thread_enviar.join()
